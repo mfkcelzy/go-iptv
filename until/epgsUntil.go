@@ -166,8 +166,10 @@ func UpdataEpgList() bool {
 				dao.DB.Model(&models.IptvEpgList{}).Where("id = ?", list.ID).Updates(&models.IptvEpgList{Status: 1, LastTime: time.Now().Unix()})
 				// dao.DB.Model(&models.IptvEpg{}).Where("name like ?", list.Remarks+"-%").Delete(&models.IptvEpg{})
 				// dao.DB.Model(&models.IptvEpg{}).Create(&epgs)
-				SyncEpgs(list.Remarks, epgs) // 同步
-				go BindChannel()
+				reload, _ := SyncEpgs(list.Remarks, epgs) // 同步
+				if reload {
+					go BindChannel() // 绑定频道
+				}
 				// CleanMealsXmlCacheAll() // 清除缓存
 			}
 		}
@@ -230,9 +232,11 @@ func UpdataEpgListOne(id int64) bool {
 			dao.DB.Model(&models.IptvEpgList{}).Where("id = ?", list.ID).Updates(&models.IptvEpgList{Status: 1, LastTime: time.Now().Unix()})
 			// dao.DB.Model(&models.IptvEpg{}).Where("name like ?", list.Remarks+"-%").Delete(&models.IptvEpg{})
 			// dao.DB.Model(&models.IptvEpg{}).Create(&epgs)
-			SyncEpgs(list.Remarks, epgs) // 同步
-			// CleanMealsXmlCacheAll()      // 清空缓存
-			go BindChannel() // 绑定频道
+			reload, _ := SyncEpgs(list.Remarks, epgs) // 同步
+			if reload {
+				go BindChannel() // 绑定频道
+			}
+
 			return true
 		}
 		return false
@@ -289,11 +293,11 @@ func BindChannel() bool {
 // - 保留数据库中已存在的记录（不更新）
 // - 新数据中有但数据库没有的 → 新增
 // - 数据库中有但新数据中没有的 → 删除
-func SyncEpgs(prefix string, epgs []models.IptvEpg) error {
+func SyncEpgs(prefix string, epgs []models.IptvEpg) (bool, error) {
 	// 1. 查询数据库中已有的记录
 	var oldEpgs []models.IptvEpg
 	if err := dao.DB.Where("name LIKE ?", prefix+"-%").Find(&oldEpgs).Error; err != nil {
-		return err
+		return false, err
 	}
 
 	// 2. 建立 name 映射方便比对
@@ -326,20 +330,23 @@ func SyncEpgs(prefix string, epgs []models.IptvEpg) error {
 	// 4. 执行数据库操作
 	if len(toDelete) > 0 {
 		if err := dao.DB.Where("name IN ?", toDelete).Delete(&models.IptvEpg{}).Error; err != nil {
-			return err
+			return false, err
 		}
 		log.Printf("删除 %d 条无效 EPG 记录\n", len(toDelete))
 	}
 
 	if len(toAdd) > 0 {
 		if err := dao.DB.Create(&toAdd).Error; err != nil {
-			return err
+			return false, err
 		}
 		log.Printf("新增 %d 条 EPG 记录\n", len(toAdd))
 	}
 
 	log.Printf("同步完成：新增 %d，删除 %d\n", len(toAdd), len(toDelete))
-	return nil
+	if len(toAdd) > 0 || len(toDelete) > 0 {
+		return true, nil
+	}
+	return false, nil
 }
 
 func GetTxt(id int64) string {

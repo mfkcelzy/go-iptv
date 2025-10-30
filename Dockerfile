@@ -15,23 +15,22 @@ RUN chmod +x /app/iptv
 FROM alpine:latest
 WORKDIR /app
 
+ENV TZ=Asia/Shanghai
+RUN apk add --no-cache openjdk8 bash curl tzdata sqlite;\
+    cp /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+    
 COPY ./client /client
 COPY ./apktool/* /usr/bin/
 COPY ./static /app/static
 COPY ./database /app/database
 COPY ./config.yml /app/config.yml
 COPY ./README.md  /app/README.md
-COPY ./ChangeLog.md /app/ChangeLog.md
 COPY ./logo /app/logo
-COPY ./Version /app/Version
 COPY ./license/license-amd64 /app/license
+COPY ./ChangeLog.md /app/ChangeLog.md
+COPY ./Version /app/Version
 
-ENV TZ=Asia/Shanghai
-RUN apk add --no-cache openjdk8 bash curl tzdata sqlite;\
-    cp /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone; \
-    # mkdir -p /config/images/icon ; \
-    # mkdir -p /config/images/bj ; \
-    chmod 777 -R /usr/bin/apktool* 
+RUN chmod 777 -R /usr/bin/apktool* 
 
 COPY --from=builder /app/iptv .
 
