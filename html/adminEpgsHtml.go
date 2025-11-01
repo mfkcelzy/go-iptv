@@ -64,7 +64,7 @@ func Epgs(c *gin.Context) {
 
 	recStart := recCounts * (pageData.Page - 1)
 	dbQuery := dao.DB.Model(&models.IptvEpg{})
-	if pageData.Keywords == "" {
+	if pageData.Keywords != "" {
 		keywords := "%" + pageData.Keywords + "%" // 模糊查询
 		dbQuery = dbQuery.Where("name like ? or remarks like ? or content like ?", keywords, keywords, keywords)
 	}
