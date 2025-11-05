@@ -121,12 +121,18 @@ func doRebuild(ctx context.Context) {
 			} else if res.Code != 1 {
 				log.Println("分辨率测试失败:", res.Msg)
 			} else {
-				log.Println("分辨率测试成功")
-				log.Println("🚀 重新执行EPG缓存重建任务")
-				dao.Cache.Clear()      //清除缓存
-				makeMealsXmlCacheAll() //重新生成
-			}
+				log.Println("分辨率测试任务执行中...")
 
+				res, _ := dao.WS.SendWS(dao.Request{Action: "getTestStatus"}) //获取测试状态
+				for res.Code != 1 {
+					time.Sleep(5 * time.Second)
+					res, _ = dao.WS.SendWS(dao.Request{Action: "getTestStatus"}) //获取测试状态
+				}
+				log.Println("分辨率测试完成")
+				dao.Cache.Clear() //清除缓存
+				makeMealsXmlCacheAll()
+				log.Println("🚀 重新执行EPG缓存重建")
+			}
 		}
 	}
 }
