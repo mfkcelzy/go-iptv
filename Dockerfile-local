@@ -9,7 +9,20 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o iptv main.go
+# 根据架构交叉编译
+RUN if [ "$TARGETARCH" = "arm" ]; then \
+        echo "交叉编译 armv7"; \
+        GOOS=linux GOARCH=arm GOARM=7 go build -o iptv main.go ; \
+    else \
+        if [ "$TARGETARCH" = "amd64" ]; then \
+            echo "编译 amd64"; \
+            GOOS=linux GOARCH=amd64 go build -o iptv main.go ; \
+        else \
+            echo "交叉编译 arm64"; \
+        fi \
+        GOOS=linux GOARCH=$TARGETARCH go build -o iptv main.go ; \
+    fi
+
 RUN chmod +x /app/iptv
 
 

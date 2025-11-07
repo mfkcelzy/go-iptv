@@ -91,7 +91,7 @@ func (c *WSClient) connect() error {
 		}
 		c.conn, _, err = dialer.Dial(c.url, nil)
 		if err == nil {
-			log.Println("✅ License服务 连接成功:", c.url)
+			log.Println("✅ License服务 连接成功")
 			return nil
 		}
 		log.Printf("❌ 第 %d 次连接失败: %v, 3 秒后重试...", i, err)
