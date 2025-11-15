@@ -187,12 +187,12 @@
                             <nav> 
                                 <ul class="pager"> 
                                 {{ $prev := .Page }} {{ if gt .Page 1 }} {{ $prev = Sub .Page 1 }} {{ else }} {{ $prev = 1 }} {{ end }} 
-                                    <li><a href="?page={{ $prev }}&keywords={{ .Keywords }}" class="loaduser">上一页</a></li>  
+                                    <li><a href="?page={{ $prev }}&keywords={{ .Keywords }}&recCounts={{ .RecCounts }}" class="loaduser">上一页</a></li>  
                                 {{ $next := .Page }} {{ if lt .Page .PageCount }} {{ $next = Add .Page 1 }} {{ else }} {{ $next = .Page }} {{ end }} 
-                                    <li><a href="?page={{ $next }}&keywords={{ .Keywords }}" class="loaduser">下一页</a></li>
+                                    <li><a href="?page={{ $next }}&keywords={{ .Keywords }}&recCounts={{ .RecCounts }}" class="loaduser">下一页</a></li>
 
-                                    <li class="previous"><a href="?page=1&keywords={{ .Keywords }}" class="loaduser">&larr;首页</a></li> 
-                                    <li class="next"><a href="?page={{ .PageCount }}&keywords={{ .Keywords }}" class="loaduser">尾页&rarr;</a></li>
+                                    <li class="previous"><a href="?page=1&keywords={{ .Keywords }}&recCounts={{ .RecCounts }}" class="loaduser">&larr;首页</a></li> 
+                                    <li class="next"><a href="?page={{ .PageCount }}&keywords={{ .Keywords }}&recCounts={{ .RecCounts }}" class="loaduser">尾页&rarr;</a></li>
                                 </ul> 
                             </nav>
 						</div>

@@ -494,36 +494,36 @@ func AddChannelList(srclist string, cId, listId int64, doRepeat bool) (int, erro
 }
 
 func SyncCaToEpg(caId int64) {
+	caIdStr := fmt.Sprintf("%d", caId)
+
 	dao.DB.Model(&models.IptvEpg{}).
-		Where("status = ?", 1).
-		// 防止重复追加：只有不包含该 caId 时才更新
-		Update("fromlist", gorm.Expr(`
-			CASE 
-				WHEN (fromlist = '' OR fromlist IS NULL) THEN ?
-				WHEN FIND_IN_SET(?, fromlist) = 0 THEN CONCAT(fromlist, ',', ?)
-				ELSE fromlist
+		Where("status = 1").
+		Update("cas", gorm.Expr(`
+			CASE
+				WHEN cas IS NULL OR cas = '' THEN ?
+				WHEN instr(',' || cas || ',', ',' || ? || ',') = 0 THEN cas || ',' || ?
+				ELSE cas
 			END
-		`, caId, caId, caId))
+		`, caIdStr, caIdStr, caIdStr))
 }
 
 func RemoveCaFromEpg(caId int64) {
+	caIdStr := fmt.Sprintf("%d", caId)
+
 	dao.DB.Model(&models.IptvEpg{}).
-		Where("status = ?", 1).
-		Update("fromlist", gorm.Expr(`
-			TRIM(BOTH ',' FROM 
+		Where("status = 1").
+		Update("cas", gorm.Expr(`
+			TRIM(
 				REPLACE(
 					REPLACE(
-						REPLACE(
-							CONCAT(',', fromlist, ','), 
-							CONCAT(',', ?, ','), 
-							','
-						),
-						',,', 
+						',' || cas || ',',
+						',' || ? || ',',
 						','
 					),
-					',,', 
+					',,',
 					','
-				)
+				),
+				','
 			)
-		`, caId))
+		`, caIdStr))
 }
