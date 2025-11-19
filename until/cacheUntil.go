@@ -194,6 +194,7 @@ func CleanAutoCacheAll() {
 	for _, ca := range ca {
 		log.Println("删除自动聚合缓存: ", ca.Name)
 		dao.Cache.Delete("autoCategory_" + strconv.FormatInt(ca.ID, 10))
+		dao.Cache.Delete("autoCategory_" + strconv.FormatInt(ca.ID, 10) + "_show")
 	}
 	CleanMealsTxtCacheAll()
 }
