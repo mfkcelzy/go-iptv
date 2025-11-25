@@ -4,28 +4,17 @@ ARG TARGETARCH
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
-RUN go mod download
-
 COPY . .
 
 # 根据架构复制对应 license 文件
 RUN case "$TARGETARCH" in \
-      amd64) cp ./license_all/license_amd64 ./license ;; \
-      arm64) cp ./license_all/license_arm64 ./license ;; \
-      arm)  cp ./license_all/license_armv7 ./license ;; \
+      amd64) cp ./license_all/license_amd64 ./license && cp ./iptv_dist/iptv_amd64 /app/iptv ;; \
+      arm64) cp ./license_all/license_arm64 ./license && cp ./iptv_dist/iptv_arm64 /app/iptv  ;; \
+      arm)  cp ./license_all/license_arm ./license && cp ./iptv_dist/iptv_arm /app/iptv  ;; \
       *) echo "未知架构: $TARGETARCH" && exit 1 ;; \
     esac
 
-# 根据架构交叉编译
-RUN case "$TARGETARCH" in \
-      amd64) echo "编译 amd64"; GOOS=linux GOARCH=amd64 go build -o iptv main.go ;; \
-      arm64) echo "交叉编译 arm64"; GOOS=linux GOARCH=arm64 go build -o iptv main.go ;; \
-      arm)   echo "交叉编译 armv7"; GOOS=linux GOARCH=arm GOARM=7 go build -o iptv main.go ;; \
-      *) echo "未知架构: $TARGETARCH" && exit 1 ;; \
-    esac
-
-RUN chmod +x /app/iptv
+RUN chmod +x /app/iptv /app/license
 
 FROM alpine:latest
 
