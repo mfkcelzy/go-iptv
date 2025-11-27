@@ -51,7 +51,7 @@ func License(c *gin.Context) {
 		}
 	}
 
-	if dao.IsRunning() {
+	if until.IsRunning() {
 		pageData.Status = 1
 	}
 

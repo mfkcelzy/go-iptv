@@ -1,10 +1,12 @@
 package service
 
 import (
+	"encoding/json"
 	"go-iptv/dao"
 	"go-iptv/dto"
 	"go-iptv/models"
 	"go-iptv/until"
+	"log"
 	"net/url"
 	"runtime"
 )
@@ -52,31 +54,51 @@ func Admins(params url.Values) dto.ReturnJsonDto {
 }
 
 func UpdataCheck() dto.ReturnJsonDto {
-	a, v, err := until.CheckNewVer(until.GetVersion())
-	if err != nil {
-		return dto.ReturnJsonDto{Code: 0, Msg: "检查更新失败: " + err.Error(), Type: "danger"}
+	oldWeb := until.GetVersion()
+	var oldLic string
+	verJson, err := dao.WS.SendWS(dao.Request{Action: "getVersion"})
+	if err == nil {
+		if err := json.Unmarshal(verJson.Data, &oldLic); err != nil {
+			log.Println("版本信息解析错误:", err)
+			return dto.ReturnJsonDto{Code: 0, Msg: "授权服务版本信息解析错误，请检查授权服务是否正常", Type: "danger"}
+		}
 	}
-	if a {
-		return dto.ReturnJsonDto{Code: 1, Msg: v, Type: "success"}
+	a, newWeb, err1 := until.CheckNewVerWeb(oldWeb)
+	b, newLic, err2 := until.CheckNewVerLic(oldLic)
+	if err1 != nil && err2 != nil {
+		return dto.ReturnJsonDto{Code: 0, Msg: "检查更新失败: " + err1.Error() + err2.Error(), Type: "danger"}
+	}
+	if a || b {
+		var msg string
+		if a {
+			msg += "管理系统有新版本: " + newWeb + " "
+		}
+		if b {
+			msg += "授权服务有新版本: " + newLic + " "
+		}
+		return dto.ReturnJsonDto{Code: 1, Msg: msg, Type: "success"}
 	}
 	return dto.ReturnJsonDto{Code: 2, Msg: "当前已是最新版本", Type: "success"}
 }
 
 func UpdataDown() dto.ReturnJsonDto {
-	a, v, err := until.DownloadAndVerify(runtime.GOARCH)
-	if err != nil {
-		return dto.ReturnJsonDto{Code: 0, Msg: "下载失败: " + err.Error(), Type: "danger"}
+	a, newWeb, _ := until.DownloadAndVerifyWeb(runtime.GOARCH)
+	b, newLic, _ := until.DownloadAndVerifyLic(runtime.GOARCH)
+
+	if a || b {
+		var msg string
+		if a {
+			msg += "管理系统新版本: " + newWeb + " "
+		}
+		if b {
+			msg += "授权服务新版本: " + newLic + " "
+		}
+		return dto.ReturnJsonDto{Code: 1, Msg: msg, Type: "success"}
 	}
-	if a {
-		return dto.ReturnJsonDto{Code: 1, Msg: v, Type: "success"}
-	}
-	return dto.ReturnJsonDto{Code: 0, Msg: "下载失败: " + v, Type: "danger"}
+	return dto.ReturnJsonDto{Code: 0, Msg: "下载失败", Type: "danger"}
 }
 
 func Updata() dto.ReturnJsonDto {
-	err := until.UpdateSignal()
-	if err != nil {
-		return dto.ReturnJsonDto{Code: 0, Msg: "触发更新失败: " + err.Error(), Type: "danger"}
-	}
-	return dto.ReturnJsonDto{Code: 1, Msg: "已触发更新，请稍后...", Type: "success"}
+	go until.UpdateSignal()
+	return dto.ReturnJsonDto{Code: 1, Msg: "已触发更新，请稍后刷新...", Type: "success"}
 }

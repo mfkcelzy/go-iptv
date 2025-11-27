@@ -7,37 +7,9 @@ import (
 	"go-iptv/until"
 	"log"
 	"net/url"
-	"os"
 	"regexp"
 	"strconv"
 )
-
-func ImportLicense(params url.Values) dto.ReturnJsonDto {
-	lickey := params.Get("lickey")
-	if lickey == "" {
-		return dto.ReturnJsonDto{Code: 0, Msg: "lickey不能为空", Type: "danger"}
-	}
-
-	oldLickey := until.ReadFile("/config/license.lic")
-
-	err := os.WriteFile("/config/license.lic", []byte(lickey), 0644)
-	if err != nil {
-		os.WriteFile("/config/license.lic", []byte(oldLickey), 0644)
-		return dto.ReturnJsonDto{Code: 0, Msg: "文件写入失败: " + err.Error(), Type: "danger"}
-	}
-
-	res, err := dao.WS.SendWS(dao.Request{Action: "reloadLic"})
-	if err != nil {
-		os.WriteFile("/config/license.lic", []byte(oldLickey), 0644)
-		return dto.ReturnJsonDto{Code: 0, Msg: "授权失败: " + err.Error(), Type: "danger"}
-	} else if res.Code == 1 {
-		//授权成功
-	} else if res.Code != 1 {
-		os.WriteFile("/config/license.lic", []byte(oldLickey), 0644)
-		return dto.ReturnJsonDto{Code: 0, Msg: "授权失败: " + res.Msg, Type: "danger"}
-	}
-	return dto.ReturnJsonDto{Code: 1, Msg: "授权成功", Type: "success"}
-}
 
 func Proxy(params url.Values) dto.ReturnJsonDto {
 	cfg := dao.GetConfig()
@@ -114,7 +86,7 @@ func Proxy(params url.Values) dto.ReturnJsonDto {
 }
 
 func ResEng() dto.ReturnJsonDto {
-	if dao.RestartLic() {
+	if until.RestartLic() {
 		return dto.ReturnJsonDto{Code: 1, Msg: "重启成功", Type: "success"}
 	}
 	return dto.ReturnJsonDto{Code: 0, Msg: "重启失败", Type: "danger"}

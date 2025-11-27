@@ -20,8 +20,6 @@ func License(c *gin.Context) {
 
 	for k := range params {
 		switch k {
-		case "importLic":
-			res = service.ImportLicense(params)
 		case "proxy":
 			res = service.Proxy(params)
 		case "resEng":

@@ -1272,7 +1272,7 @@ function updata(){
 				lightyear.loading('hide');
                 $.confirm({
 					title: '确认升级',
-					content: '新版本'+data.msg +'，是否下载？',
+					content: data.msg +'，是否下载？',
 					type: 'green',
 					buttons: {
 						confirm: {
@@ -1289,7 +1289,7 @@ function updata(){
 											lightyear.loading('hide');
 											$.confirm({
 												title: '确认升级',
-												content: '新版本'+data.msg +' 下载完成，是否升级？',
+												content: data.msg +' 下载完成，是否升级？',
 												type: 'green',
 												buttons: {
 													confirm: {
