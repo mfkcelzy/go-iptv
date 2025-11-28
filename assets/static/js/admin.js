@@ -7,6 +7,9 @@ function replaceContent(html) {
 	var $newMain = $temp.find('main');
 	var scripts = $temp.find('script');
 	if ($newMain.length) $('main').replaceWith($newMain);
+
+	var $newTitle = $temp.find('.navbar-page-title');
+    if ($newTitle.length) $('.navbar-page-title').replaceWith($newTitle);
 	updateYear();
 
 	// 执行 script 内容

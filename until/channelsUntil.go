@@ -228,14 +228,10 @@ func GetAutoChannelList(category models.IptvCategory, show bool) []models.IptvCh
 				}
 			}
 			if category.Proxy == 1 && cfg.Proxy.Status == 1 {
-				if strings.HasPrefix(ch.Url, "rtsp") && strings.HasPrefix(ch.Url, "rtmp") {
-					ch.PUrl = ch.Url
-				} else {
-					urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", category.ID, ch.Url)
-					msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
-					if err == nil {
-						ch.PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
-					}
+				urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", category.ID, ch.Url)
+				msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
+				if err == nil {
+					ch.PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
 				}
 			}
 			result = append(result, ch)
@@ -255,14 +251,10 @@ func GetAutoChannelList(category models.IptvCategory, show bool) []models.IptvCh
 				}
 			}
 			if category.Proxy == 1 && cfg.Proxy.Status == 1 {
-				if strings.HasPrefix(ch.Url, "rtsp") && strings.HasPrefix(ch.Url, "rtmp") {
-					ch.PUrl = ch.Url
-				} else {
-					urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", category.ID, ch.Url)
-					msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
-					if err == nil {
-						ch.PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
-					}
+				urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", category.ID, ch.Url)
+				msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
+				if err == nil {
+					ch.PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
 				}
 			}
 			result = append(result, ch)
@@ -277,35 +269,31 @@ func GetAutoChannelList(category models.IptvCategory, show bool) []models.IptvCh
 	return result
 }
 
-func CaGetChannels(categoryDb models.IptvCategory, show bool) []models.IptvChannelShow {
+func CaGetChannels(category models.IptvCategory, show bool) []models.IptvChannelShow {
 
-	if categoryDb.Type == "auto" {
-		return GetAutoChannelList(categoryDb, show)
+	if category.Type == "auto" {
+		return GetAutoChannelList(category, show)
 	} else {
 		cfg := dao.GetConfig()
 		var channels []models.IptvChannelShow
 		dao.DB.Table(models.IptvChannelShow{}.TableName()+" AS c").
 			Select("c.*, e.name AS epg_name").
 			Joins("LEFT JOIN "+models.IptvEpg{}.TableName()+" AS e ON c.e_id = e.id AND e.status = 1").
-			Where("c.c_id = ?", categoryDb.ID).
+			Where("c.c_id = ?", category.ID).
 			Order("sort asc").
 			Find(&channels)
 		for i, ch := range channels {
 			if ch.EpgName != "" {
 				channels[i].Logo = EpgNameGetLogo(ch.EpgName)
-				if categoryDb.ReName == 1 && !show {
+				if category.ReName == 1 && !show {
 					channels[i].Name = ch.EpgName
 				}
 			}
-			if categoryDb.Proxy == 1 && cfg.Proxy.Status == 1 {
-				if strings.HasPrefix(ch.Url, "rtsp") && strings.HasPrefix(ch.Url, "rtmp") {
-					ch.PUrl = ch.Url
-				} else {
-					urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", categoryDb.ID, ch.Url)
-					msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
-					if err == nil {
-						ch.PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
-					}
+			if category.Proxy == 1 && cfg.Proxy.Status == 1 {
+				urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", category.ID, ch.Url)
+				msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
+				if err == nil {
+					channels[i].PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
 				}
 			}
 		}
