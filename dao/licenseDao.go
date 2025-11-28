@@ -74,10 +74,10 @@ func (c *WSClient) connect() error {
 			log.Println("✅ 授权服务 连接成功")
 			return nil
 		}
-		log.Printf("❌ 第 %d 次连接失败: %v, 3 秒后重试...", i, err)
 		time.Sleep(5 * time.Second)
 	}
 	c.count++
+	log.Printf("❌ 第 %d 次连接失败: %v, 3 秒后重试...", c.count, err)
 	if c.count > 3 {
 		c.count = 0
 		return fmt.Errorf("❌ 多次连接失败，请检查授权服务状态: %w", err)

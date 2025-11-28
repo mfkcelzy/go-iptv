@@ -266,10 +266,15 @@
 														<input class="form-control" id="showtxtCaname" placeholder="分组名称" disabled></input>
 													</div>
 													<div class="form-group col-xs-12">
-														<label>URL:</label>&nbsp;<button class="btn btn-xs btn-info" type="button" id="showPurl" onclick="changeShowUrl(this)">切换为中转地址</button>
-															<textarea class="form-control" rows="15" id="srclist" name="srclist" placeholder="请输入频道"></textarea>
-															<textarea class="form-control" rows="15" id="plist" style="display:none;" readonly></textarea>
-															<small class="help-block">状态|频道名称|URL</small>
+														<label>URL:</label>&nbsp;<button class="btn btn-xs btn-info" type="button" id="showPurl" onclick="changeShowUrl(this)">切换为中转地址</button>&nbsp;<button class="btn btn-xs btn-info" type="button" onclick="copyCh()">复制可用频道</button>
+														<div style="display:flex;">
+															<div id="chchecks" style="width:24px; overflow:hidden; padding-right:5px;padding-top:11px;"></div>
+															<div style="flex:1;">
+																<textarea class="form-control" rows="15" id="srclist" name="srclist" placeholder="请输入频道"></textarea>
+																<textarea class="form-control" rows="15" id="plist" style="display:none;" readonly></textarea>
+															</div>
+														</div>
+														<small class="help-block">状态->频道名称|URL</small>
 													</div>
 												</div>
 												<div class="modal-footer">
@@ -401,6 +406,28 @@
 	.bootstrap-select .dropdown-menu.inner {
 	max-height: var(--max-height, 240px) !important;
 	}
+	/* 让左侧 checkbox 列与 textarea 行高一致 */
+    #chchecks label.lyear-checkbox {
+        display: block;
+        line-height: 20px;     /* 与 textarea 的行高保持接近 */
+        height: 20px;
+        padding: 1px 0;
+        margin: 0;
+        transform: scale(0.8); /* ⭐缩小 checkbox */
+        transform-origin: left top;
+    }
+
+    /* 缩小 checkbox 本体 */
+    #chchecks input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        margin: 0;
+    }
+
+    /* 去掉多余空白 */
+    #chchecks br {
+        line-height: 0;
+    }
 	</style>
 </main>
 

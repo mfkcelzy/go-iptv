@@ -679,16 +679,25 @@ function getChannelsTxt(btn){
 			if (data.type === "success") {
 				var result = "";
 				var purls = "";
+				var checksHtml = "";
 				if (!data.data || data.data.length === 0) {
 					return;
 				}
 				data.data.forEach(item => {
-					result += item.status + "|" + item.name + "," + item.url + "\n";
-					if (item.purl != ""){
-						purls += item.status + "|" + item.name + "," + item.purl + "\n";
+					result += item.name + "," + item.url + "\n";
+					if (item.purl != "" && item.purl != null && item.status == 1){
+						purls += item.name + "," + item.purl + "\n";
 					}
+					checksHtml +=
+						'<label class="lyear-checkbox checkbox-primary">' +
+							'<input type="checkbox" onchange="updateChannelStatus(this)" name="chid" value="' + item.id + '" ' +
+								(item.status == 1 ? 'checked' : '') +
+							'>' +
+							'<span></span>' +
+						'</label>';
 				});
 				$("#srclist").val(result);
+				$("#chchecks").html(checksHtml);
 				if (purls != ""){
 					$("#plist").val(purls);
 				}else {
@@ -702,6 +711,84 @@ function getChannelsTxt(btn){
 		}
 	});
 }
+
+function updateChannelStatus(checkbox) {
+    var $cb = $(checkbox);
+    var id = $cb.val();                      // 对应 item.id
+    var status = $cb.is(":checked") ? 1 : 0; // 当前状态
+
+    // 发起 AJAX 请求
+    $.ajax({
+        url: "/admin/channels",   // 后端接口
+        method: "POST",
+        data: { channelsStatus: id },
+        success: function(res) {
+			lightyear.notify(res.msg, res.type, 3000);
+            if (res.code != 1) {
+                $cb.prop("checked", !status);
+            }
+        },
+        error: function(err) {
+            lightyear.notify("请求失败", "danger", 3000);
+            // 恢复 checkbox 状态
+            $cb.prop("checked", !status);
+        }
+    });
+}
+
+function copyCh() {
+    var srclist = document.getElementById("srclist");
+    var plist = document.getElementById("plist");
+    var textToCopy = "";
+
+    if (srclist.style.display === "none") {
+        // srclist 隐藏 → 复制 plist 全部内容
+        textToCopy = plist.value;
+        if (!textToCopy || textToCopy.trim() === "未授权或未开启代理") {
+            lightyear.notify("没有可用的频道", "danger", 1000);
+            return;
+        }
+    } else {
+        // srclist 显示 → 原逻辑只复制已勾选行
+        var lines = srclist.value.split("\n"); 
+        var checkboxes = document.querySelectorAll("#chchecks input[type='checkbox']");
+        var selectedLines = [];
+
+        checkboxes.forEach(function(cb, index) {
+            if (cb.checked) {
+                selectedLines.push(lines[index]);
+            }
+        });
+
+        if (selectedLines.length === 0) {
+            lightyear.notify("没有可用的频道", "danger", 1000);
+            return;
+        }
+
+        textToCopy = selectedLines.join("\n");
+    }
+
+    // 使用临时 textarea 复制
+    var tmp = document.createElement("textarea");
+    tmp.value = textToCopy;
+    document.body.appendChild(tmp);
+    tmp.select();
+
+    try {
+        var successful = document.execCommand('copy');
+        if (successful) {
+            lightyear.notify("已复制 " + textToCopy.split("\n").length + " 行", "success", 1000);
+        } else {
+            lightyear.notify("复制失败", "danger", 1000);
+        }
+    } catch (err) {
+        console.error("复制异常:", err);
+        lightyear.notify("复制异常", "danger", 1000);
+    }
+
+    document.body.removeChild(tmp);
+}
+
 
 function resetShowUrl() {
     const src = document.getElementById("srclist");
@@ -719,10 +806,12 @@ function changeShowUrl(btn) {
 
     if (src.style.display === "none") {
         // 显示原始地址
+		$("#chchecks").show();
         src.style.display = "";
         proxy.style.display = "none";
         btn.innerText = "切换代理地址";
     } else {
+		$("#chchecks").hide();
         // 显示代理地址
         src.style.display = "none";
         proxy.style.display = "";
