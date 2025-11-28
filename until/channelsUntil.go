@@ -228,7 +228,7 @@ func GetAutoChannelList(category models.IptvCategory, show bool) []models.IptvCh
 				}
 			}
 			if category.Proxy == 1 && cfg.Proxy.Status == 1 {
-				if strings.HasPrefix(ch.Url, "rtsp://") {
+				if strings.HasPrefix(ch.Url, "rtsp") && strings.HasPrefix(ch.Url, "rtmp") {
 					ch.PUrl = ch.Url
 				} else {
 					urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", category.ID, ch.Url)
@@ -255,10 +255,14 @@ func GetAutoChannelList(category models.IptvCategory, show bool) []models.IptvCh
 				}
 			}
 			if category.Proxy == 1 && cfg.Proxy.Status == 1 {
-				urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", category.ID, ch.Url)
-				msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
-				if err == nil {
-					ch.PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
+				if strings.HasPrefix(ch.Url, "rtsp") && strings.HasPrefix(ch.Url, "rtmp") {
+					ch.PUrl = ch.Url
+				} else {
+					urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", category.ID, ch.Url)
+					msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
+					if err == nil {
+						ch.PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
+					}
 				}
 			}
 			result = append(result, ch)
@@ -294,10 +298,14 @@ func CaGetChannels(categoryDb models.IptvCategory, show bool) []models.IptvChann
 				}
 			}
 			if categoryDb.Proxy == 1 && cfg.Proxy.Status == 1 {
-				urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", categoryDb.ID, ch.Url)
-				msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
-				if err == nil {
-					channels[i].PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
+				if strings.HasPrefix(ch.Url, "rtsp") && strings.HasPrefix(ch.Url, "rtmp") {
+					ch.PUrl = ch.Url
+				} else {
+					urlMsg := fmt.Sprintf("{\"c\":%d,\"u\":\"%s\"}", categoryDb.ID, ch.Url)
+					msg, err := UrlEncrypt(dao.Lic.ID, urlMsg)
+					if err == nil {
+						ch.PUrl = fmt.Sprintf("%s:%d/p/%s", cfg.Proxy.PAddr, cfg.Proxy.Port, msg)
+					}
 				}
 			}
 		}
