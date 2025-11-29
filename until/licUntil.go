@@ -12,14 +12,14 @@ func IsRunning() bool {
 	cmd := exec.Command("bash", "-c", "ps -ef | grep '/license' | grep -v grep")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("检查 授权服务 进程出错: %v", err)
+		log.Printf("引擎进程出错: %v", err)
 		return false
 	}
 	return strings.Contains(string(output), "license")
 }
 
 func RestartLic() bool {
-	log.Println("♻️ 正在重启  授权服务  服务...")
+	log.Println("♻️ 正在重启引擎...")
 
 	r := GetUrlData("http://127.0.0.1:82/licRestart")
 	if strings.TrimSpace(r) == "" {
@@ -32,7 +32,7 @@ func RestartLic() bool {
 
 	ws, err := dao.ConLicense("ws://127.0.0.1:81/ws")
 	if err != nil {
-		log.Println("授权服务连接失败")
+		log.Println("引擎连接失败")
 		return false
 	}
 	dao.WS = ws
@@ -49,6 +49,6 @@ func RestartLic() bool {
 		return false
 	}
 
-	log.Println("✅  授权服务  已成功重启并重新连接")
+	log.Println("✅  引擎已成功重启并重新连接")
 	return true
 }

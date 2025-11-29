@@ -60,7 +60,7 @@ func UpdataCheck() dto.ReturnJsonDto {
 	if err == nil {
 		if err := json.Unmarshal(verJson.Data, &oldLic); err != nil {
 			log.Println("版本信息解析错误:", err)
-			return dto.ReturnJsonDto{Code: 0, Msg: "授权服务版本信息解析错误，请检查授权服务是否正常", Type: "danger"}
+			return dto.ReturnJsonDto{Code: 0, Msg: "引擎版本信息解析错误，请检查引擎是否正常", Type: "danger"}
 		}
 	}
 	a, newWeb, err1 := until.CheckNewVerWeb(oldWeb)
@@ -82,7 +82,7 @@ func UpdataCheck() dto.ReturnJsonDto {
 			msg += "管理系统有新版本: " + newWeb + " "
 		}
 		if b {
-			msg += "授权服务有新版本: " + newLic + " "
+			msg += "引擎有新版本: " + newLic + " "
 		}
 		return dto.ReturnJsonDto{Code: 1, Msg: msg, Type: "success"}
 	}
@@ -99,7 +99,7 @@ func UpdataDown() dto.ReturnJsonDto {
 			msg += "管理系统新版本: " + newWeb + " "
 		}
 		if b {
-			msg += "授权服务新版本: " + newLic + " "
+			msg += "引擎新版本: " + newLic + " "
 		}
 		return dto.ReturnJsonDto{Code: 1, Msg: msg, Type: "success"}
 	}

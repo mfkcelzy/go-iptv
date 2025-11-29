@@ -137,7 +137,7 @@ func CheckNewVerWeb(local string) (bool, string, error) {
 func CheckNewVerLic(local string) (bool, string, error) {
 	latest, err := fetchLatestStableRelease("wz1st", "iptv-license-down")
 	if err != nil {
-		log.Println("Github 授权服务检查失败: ", err.Error())
+		log.Println("Github 引擎版本检查失败: ", err.Error())
 		return false, "", err
 	}
 

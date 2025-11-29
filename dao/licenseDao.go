@@ -71,7 +71,7 @@ func (c *WSClient) connect() error {
 		c.conn, _, err = dialer.Dial(c.url, nil)
 		if err == nil {
 			c.count = 0
-			log.Println("✅ 授权服务 连接成功")
+			log.Println("✅ 引擎连接成功")
 			return nil
 		}
 		time.Sleep(5 * time.Second)
@@ -80,7 +80,7 @@ func (c *WSClient) connect() error {
 	log.Printf("❌ 第 %d 次连接失败: %v, 3 秒后重试...", c.count, err)
 	if c.count > 3 {
 		c.count = 0
-		return fmt.Errorf("❌ 多次连接失败，请检查授权服务状态: %w", err)
+		return fmt.Errorf("❌ 多次连接失败，请检查引擎状态: %w", err)
 	}
 	c.connect()
 	return fmt.Errorf("连接失败: %w", err)
@@ -197,7 +197,7 @@ func (c *WSClient) Close() {
 
 	if c.conn != nil {
 		c.conn.Close()
-		log.Println("🔒 授权服务断开")
+		log.Println("🔒 引擎断开")
 	}
 }
 
