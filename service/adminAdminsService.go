@@ -75,12 +75,17 @@ func UpdataCheckLic() dto.ReturnJsonDto {
 	verJson, err := dao.WS.SendWS(dao.Request{Action: "getVersion"})
 
 	if err != nil {
-		return dto.ReturnJsonDto{Code: 0, Msg: "检查更新失败: " + err.Error(), Type: "danger"}
+		oldLic = until.ReadFile("/config/bin/Version_lic")
+		if oldLic == "" {
+			return dto.ReturnJsonDto{Code: 0, Msg: "检查更新失败: " + err.Error(), Type: "danger"}
+		}
+	} else {
+		if err := json.Unmarshal(verJson.Data, &oldLic); err != nil {
+			log.Println("版本信息解析错误:", err)
+			return dto.ReturnJsonDto{Code: 0, Msg: "引擎版本信息解析错误，请检查引擎是否正常", Type: "danger"}
+		}
 	}
-	if err := json.Unmarshal(verJson.Data, &oldLic); err != nil {
-		log.Println("版本信息解析错误:", err)
-		return dto.ReturnJsonDto{Code: 0, Msg: "引擎版本信息解析错误，请检查引擎是否正常", Type: "danger"}
-	}
+
 	up, newLic, err := until.CheckNewVerLic(oldLic)
 
 	if err != nil {
