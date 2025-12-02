@@ -103,7 +103,7 @@ jobs:
 
 
       # ---创建或更新 Release---
-      - name: Create/Update Release
+      - name: Create/Update Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.IMAGE_VERSION }}
@@ -111,14 +111,6 @@ jobs:
           prerelease: ${{ contains(env.IMAGE_VERSION, 'beta') }}
           generate_release_notes: true
           overwrite_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-      # ---上传文件到 release---
-      - name: Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
           files: iptv_dist/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
